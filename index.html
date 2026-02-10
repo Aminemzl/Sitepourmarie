@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Pour Marie 💖</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- Three.js CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+<!-- GSAP -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Cormorant+Garamond:wght@400;600;700&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --pink: #FF6B9D;
+  --pink-dark: #E91E63;
+  --pink-light: #FFB3D9;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  height: 100vh;
+  overflow: hidden;
+  background: radial-gradient(ellipse at top, #1a0d1a 0%, #0a0a0a 50%, #000000 100%);
+  position: relative;
+  color: white;
+}
+
+/* Effet de lueur rose subtile */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at 50% 50%, rgba(255, 107, 157, 0.15) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Canvas 3D */
+#canvasContainer {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* Écrans */
+.screen {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 10;
+  transition: opacity 1s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.screen.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Container moderne */
+.container {
+  max-width: 700px;
+  width: 90%;
+  text-align: center;
+  padding: 80px 60px;
+  position: relative;
+}
+
+/* Typographie élégante */
+h1 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(36px, 6vw, 64px);
+  font-weight: 600;
+  background: linear-gradient(135deg, #fff 0%, var(--pink-light) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 20px;
+  line-height: 1.2;
+  letter-spacing: -0.03em;
+}
+
+.subtitle {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.5);
+  font-weight: 400;
+  margin-bottom: 60px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+/* Boutons ultra modernes */
+.button-group {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+button {
+  padding: 18px 56px;
+  border: none;
+  border-radius: 50px;
+  font-size: 17px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+  position: relative;
+  letter-spacing: 0.02em;
+}
+
+#yes {
+  background: linear-gradient(135deg, var(--pink) 0%, var(--pink-dark) 100%);
+  color: white;
+  box-shadow: 
+    0 0 40px rgba(255, 107, 157, 0.4),
+    0 10px 30px rgba(255, 107, 157, 0.3);
+}
+
+#yes:hover {
+  transform: translateY(-3px);
+  box-shadow: 
+    0 0 60px rgba(255, 107, 157, 0.6),
+    0 15px 40px rgba(255, 107, 157, 0.4);
+}
+
+#yes:active {
+  transform: translateY(-1px);
+}
+
+#no {
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+#no:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* Galerie moderne */
+.gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 24px;
+  margin: 50px 0;
+}
+
+.gallery img {
+  width: 100%;
+  height: 320px;
+  object-fit: cover;
+  border-radius: 20px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.gallery img:hover {
+  transform: translateY(-10px) scale(1.03);
+  box-shadow: 
+    0 20px 60px rgba(0, 0, 0, 0.7),
+    0 0 40px rgba(255, 107, 157, 0.3);
+}
+
+/* Texte élégant */
+.message {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(24px, 4vw, 36px);
+  background: linear-gradient(135deg, #fff 0%, var(--pink-light) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1.6;
+  margin: 40px 0;
+  font-weight: 400;
+}
+
+/* Particules subtiles */
+.particle {
+  position: fixed;
+  width: 2px;
+  height: 2px;
+  background: var(--pink);
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: 0;
+  z-index: 5;
+}
+
+/* Navigation dots minimaliste */
+.nav-dots {
+  position: fixed;
+  bottom: 50px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 10px;
+  z-index: 100;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+  cursor: pointer;
+}
+
+.dot:hover {
+  background: rgba(255, 255, 255, 0.4);
+}
+
+.dot.active {
+  width: 32px;
+  border-radius: 3px;
+  background: var(--pink);
+  box-shadow: 0 0 20px rgba(255, 107, 157, 0.6);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .container {
+    padding: 60px 30px;
+  }
+  
+  button {
+    padding: 16px 40px;
+    font-size: 16px;
+  }
+  
+  .gallery {
+    grid-template-columns: 1fr;
+  }
+  
+  .gallery img {
+    height: 280px;
+  }
+}
+
+/* Animations d'entrée fluides */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.container > * {
+  animation: fadeInUp 0.8s cubic-bezier(0.23, 1, 0.32, 1) backwards;
+}
+
+.container > *:nth-child(1) { animation-delay: 0.1s; }
+.container > *:nth-child(2) { animation-delay: 0.2s; }
+.container > *:nth-child(3) { animation-delay: 0.3s; }
+.container > *:nth-child(4) { animation-delay: 0.4s; }
+
+/* Bouton suivant */
+.btn-next {
+  background: linear-gradient(135deg, var(--pink) 0%, var(--pink-dark) 100%);
+  color: white;
+  box-shadow: 
+    0 0 40px rgba(255, 107, 157, 0.4),
+    0 10px 30px rgba(255, 107, 157, 0.3);
+}
+
+.btn-next:hover {
+  transform: translateY(-3px);
+  box-shadow: 
+    0 0 60px rgba(255, 107, 157, 0.6),
+    0 15px 40px rgba(255, 107, 157, 0.4);
+}
+</style>
+</head>
+
+<body>
+
+<!-- Canvas 3D -->
+<div id="canvasContainer"></div>
+
+<!-- Navigation dots -->
+<div class="nav-dots" id="navDots">
+  <div class="dot active"></div>
+  <div class="dot"></div>
+  <div class="dot"></div>
+  <div class="dot"></div>
+</div>
+
+<!-- ÉCRAN 1 -->
+<div class="screen active" id="s1">
+  <div class="container">
+    <h1>Veux-tu être ma Valentine (ou plutôt ma Marietine a.k.a mon ptit beb) ?</h1>
+    <p class="subtitle">P</p>
+    <div class="button-group">
+      <button id="yes">Oui ma vie, avec grande joie !!! 💕</button>
+      <button id="no">Non Amine t'es moche, claqué + t'as les cheveux long</button>
+    </div>
+  </div>
+</div>
+
+<!-- ÉCRAN 2 -->
+<div class="screen" id="s2">
+  <div class="container">
+    <div class="gallery">
+      <img src="/images/photo1.jpeg" alt="Nous">
+      <img src="/images/photo2.jpeg" alt="Nous">
+    </div>
+    <p class="message">T'as cliquée oui? Tu as fait le bon choix, le choix d'une vie, tu sais pourquoi ? 
+    </p>
+    <button class="btn-next" onclick="go(3)">Continuer →</button>
+  </div>
+</div>
+
+<!-- ÉCRAN 3 -->
+<div class="screen" id="s3">
+  <div class="container">
+    <div class="gallery">
+      <img src="images/photo3.jpeg" alt="Nous">
+      <img src="images/photo4.jpeg" alt="Nous">
+    </div>
+    <p class="message">Car t'es le plus beau des trésors qui me soit tomber entre les mains, t'es juste une merveilleuse copine
+    dont j'ai la chance de vivre avec au quotidien, t'as tellement de qualités que je ne pourrais pas tous les énumérées (et c'est pas une 
+    question de facilité :p. T'es merveilleuse, mon ptit beb depuis 5 ans et 59 jours oui j'ai calculé)
+    </p>
+    <button class="btn-next" onclick="go(4)">La suite →</button>
+  </div>
+</div>
+
+<!-- ÉCRAN FINAL -->
+<div class="screen" id="s4">
+  <div class="container">
+    <div class="gallery">
+      <img src="images/photo5.jpeg" alt="Nous">
+    </div>
+    <p class="message">
+      Et si je devais refaire un choix…<br><br>
+      Ce serait toujours toi, personne ne t'égale, personne ne me rends plus heureux et personne n'a autant d'importance que toi à mes yeux, même si des fois je suis pas le plus cool 
+      des copains, je ferai chaque jour en sorte d'être meileur pour toi, de te faire plaisir et prendre soin de toi 
+      c'est ce que tu mérites et un de mes buts c'est de faire ca du mieux possible et que tu sois heureuse
+      tout au long de ta vie ❤️
+    </p>
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+  /* ===== THREE.JS - CŒUR 3D ULTRA FIN ===== */
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+  camera.position.z = 10;
+
+  const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setClearColor(0x000000, 0);
+  document.getElementById("canvasContainer").appendChild(renderer.domElement);
+
+  // Forme du cœur
+  const heartShape = new THREE.Shape();
+  const x = 0, y = 0;
+  heartShape.moveTo(x + 0.5, y + 0.5);
+  heartShape.bezierCurveTo(x + 0.5, y + 0.5, x + 0.4, y, x, y);
+  heartShape.bezierCurveTo(x - 0.6, y, x - 0.6, y + 0.7, x - 0.6, y + 0.7);
+  heartShape.bezierCurveTo(x - 0.6, y + 1.1, x - 0.3, y + 1.54, x + 0.5, y + 1.9);
+  heartShape.bezierCurveTo(x + 1.2, y + 1.54, x + 1.6, y + 1.1, x + 1.6, y + 0.7);
+  heartShape.bezierCurveTo(x + 1.6, y + 0.7, x + 1.6, y, x + 1.0, y);
+  heartShape.bezierCurveTo(x + 0.7, y, x + 0.5, y + 0.5, x + 0.5, y + 0.5);
+
+  // Tranches TRÈS fines pour un look moderne
+  const extrudeSettings = {
+    depth: 0.08,
+    bevelEnabled: true,
+    bevelThickness: 0.03,
+    bevelSize: 0.02,
+    bevelSegments: 1
+  };
+
+  const geometry = new THREE.ExtrudeGeometry(heartShape, extrudeSettings);
+  geometry.center();
+
+  // Créer le cœur avec effet de contour
+  // 1. Contour rose (edges)
+  const edges = new THREE.EdgesGeometry(geometry, 15);
+  const lineMaterial = new THREE.LineBasicMaterial({ 
+    color: 0xFF6B9D,
+    linewidth: 2,
+    transparent: true,
+    opacity: 1
+  });
+  const heartOutline = new THREE.LineSegments(edges, lineMaterial);
+  
+  // 2. Corps transparent du cœur
+  const material = new THREE.MeshPhysicalMaterial({
+    color: 0xFF6B9D,
+    metalness: 0,
+    roughness: 0.1,
+    transparent: true,
+    opacity: 0.15,
+    side: THREE.DoubleSide,
+    emissive: 0xFF6B9D,
+    emissiveIntensity: 0.1
+  });
+
+  const heart = new THREE.Mesh(geometry, material);
+  heart.add(heartOutline); // Ajouter le contour au cœur
+  heart.scale.set(0.3, 0.3, 0.3); // Démarrer TRÈS petit
+  heart.rotation.z = Math.PI;
+  scene.add(heart);
+  
+  // Stocker la référence au contour pour les animations
+  heart.userData.outline = heartOutline;
+
+  // Lumières douces
+  const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+  scene.add(ambientLight);
+
+  const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+  directionalLight.position.set(5, 5, 5);
+  scene.add(directionalLight);
+
+  const pointLight = new THREE.PointLight(0xFF6B9D, 1, 100);
+  pointLight.position.set(0, 0, 5);
+  scene.add(pointLight);
+
+  // Animation ultra fluide
+  let time = 0;
+  let isPulsing = true; // Contrôle de la pulsation
+  let baseScale = 0.3; // Taille de base
+  
+  function animate() {
+    requestAnimationFrame(animate);
+    time += 0.006;
+    
+    heart.rotation.y += 0.002;
+    
+    // Pulsation seulement si activée
+    if (isPulsing) {
+      const pulse = 1 + Math.sin(time * 1.5) * 0.05;
+      heart.scale.set(baseScale * pulse, baseScale * pulse, baseScale * pulse);
+    }
+    
+    renderer.render(scene, camera);
+  }
+  animate();
+
+  // Responsive
+  window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
+
+  /* ===== PARTICULES SUBTILES ===== */
+  function createParticle(x, y) {
+    for(let i = 0; i < 20; i++) {
+      const particle = document.createElement('div');
+      particle.className = 'particle';
+      particle.style.left = x + 'px';
+      particle.style.top = y + 'px';
+      document.body.appendChild(particle);
+      
+      const angle = (Math.PI * 2 * i) / 20;
+      const distance = 60 + Math.random() * 40;
+      
+      gsap.to(particle, {
+        x: Math.cos(angle) * distance,
+        y: Math.sin(angle) * distance,
+        opacity: 0.8,
+        duration: 0.4,
+        ease: "power2.out"
+      });
+      
+      gsap.to(particle, {
+        opacity: 0,
+        duration: 0.6,
+        delay: 0.4,
+        onComplete: () => particle.remove()
+      });
+    }
+  }
+
+  /* ===== INTERACTIONS ===== */
+  
+  // Bouton NON qui fuit loin (impossible à cliquer)
+  const noBtn = document.getElementById("no");
+  
+  noBtn.addEventListener("mouseenter", (e) => {
+    const rect = noBtn.getBoundingClientRect();
+    
+    // Position très éloignée, dans toute la fenêtre
+    const maxX = window.innerWidth - rect.width - 20;
+    const maxY = window.innerHeight - rect.height - 20;
+    
+    // Calcul pour éviter la position actuelle
+    let newX, newY;
+    do {
+      newX = Math.random() * maxX;
+      newY = Math.random() * maxY;
+    } while (
+      Math.abs(newX - rect.left) < 300 || 
+      Math.abs(newY - rect.top) < 200
+    );
+    
+    gsap.to(noBtn, {
+      x: newX - rect.left,
+      y: newY - rect.top,
+      duration: 0.3,
+      ease: "power2.out"
+    });
+  });
+
+  // Bouton OUI - animation spectaculaire
+  document.getElementById("yes").addEventListener("click", (e) => {
+    createParticle(e.clientX, e.clientY);
+    
+    // Désactiver la pulsation automatique
+    isPulsing = false;
+    
+    console.log("Clic OUI - Scale avant:", heart.scale.x);
+    
+    // EXPLOSION du cœur - agrandissement spectaculaire
+    gsap.to(heart.scale, {
+      x: 5,
+      y: 5,
+      z: 5,
+      duration: 1.2,
+      ease: "power3.out",
+      onUpdate: () => {
+        console.log("Scale pendant animation:", heart.scale.x);
+      }
+    });
+    
+    // Rotation pendant l'agrandissement
+    gsap.to(heart.rotation, {
+      y: heart.rotation.y + Math.PI * 2,
+      duration: 1.2,
+      ease: "power2.inOut"
+    });
+    
+    // Effet de lueur
+    gsap.to(heart.material, {
+      emissiveIntensity: 0.5,
+      opacity: 0.3,
+      duration: 0.6,
+      ease: "power2.out"
+    });
+    
+    // Retour à la taille normale
+    gsap.to(heart.scale, {
+      x: 0.3,
+      y: 0.3,
+      z: 0.3,
+      duration: 0.8,
+      delay: 1.2,
+      ease: "back.out(1.5)",
+      onComplete: () => {
+        console.log("Scale après animation:", heart.scale.x);
+        baseScale = 0.3;
+        isPulsing = true; // Réactiver la pulsation
+        
+        gsap.to(heart.material, {
+          emissiveIntensity: 0.1,
+          opacity: 0.15,
+          duration: 0.5
+        });
+        
+        setTimeout(() => go(2), 300);
+      }
+    });
+  });
+
+  /* ===== NAVIGATION ===== */
+  const dots = document.querySelectorAll('.dot');
+  
+  window.go = function(n) {
+    // Transition des écrans
+    document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+    document.getElementById("s" + n).classList.add("active");
+    
+    // Update dots
+    dots.forEach((dot, i) => {
+      dot.classList.toggle('active', i === n - 1);
+    });
+    
+    // Désactiver la pulsation
+    isPulsing = false;
+    
+    // Animation élégante du cœur
+    gsap.to(heart.scale, {
+      x: 3.5,
+      y: 3.5,
+      z: 3.5,
+      duration: 0.8,
+      ease: "power3.out"
+    });
+    
+    gsap.to(heart.rotation, {
+      y: heart.rotation.y + Math.PI,
+      duration: 0.8,
+      ease: "power2.inOut"
+    });
+    
+    gsap.to(heart.material, {
+      emissiveIntensity: 0.4,
+      opacity: 0.25,
+      duration: 0.4,
+      ease: "power2.out"
+    });
+    
+    // Retour petit
+    gsap.to(heart.scale, {
+      x: 0.3,
+      y: 0.3,
+      z: 0.3,
+      duration: 0.6,
+      delay: 0.8,
+      ease: "back.out(1.3)",
+      onComplete: () => {
+        baseScale = 0.3;
+        isPulsing = true; // Réactiver la pulsation
+      }
+    });
+    
+    gsap.to(heart.material, {
+      emissiveIntensity: 0.1,
+      opacity: 0.15,
+      duration: 0.5,
+      delay: 0.8
+    });
+  };
+  
+  // Navigation par dots
+  dots.forEach((dot, i) => {
+    dot.addEventListener('click', () => go(i + 1));
+  });
+
+});
+</script>
+
+</body>
+</html>
